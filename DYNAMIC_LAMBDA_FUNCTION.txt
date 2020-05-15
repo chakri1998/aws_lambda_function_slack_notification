@@ -1,0 +1,104 @@
+import json
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+from datetime import datetime
+import ast
+import boto3
+
+session = boto3.session.Session()
+
+def lambda_handler(event, context):
+    webhook_url = 'https://hooks.slack.com/services/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' # Set destination URL here
+    
+    try:
+        x="i am string"
+        thisdict =	{
+          "type": "i",
+          "name": "am dict"
+        }
+        if type(event['Records'][0]['Sns']['Message']) == type(thisdict):
+            message = event['Records'][0]['Sns']['Message']
+            def clean_nones(message):
+                if isinstance(message, list):
+                    return [clean_nones(x) for x in message if x is not None]
+                elif isinstance(message, dict):
+                    return {
+                        key: clean_nones(val)
+                        for key, val in message.items()
+                        if val is not None
+                    }
+                else:
+                    return message
+
+            name=json.dumps((clean_nones(message)),separators=(". ", " = "))
+            final=name.replace('"','').replace('{','').replace('}','')
+            slack_data ={
+            'channel': 'general',
+            'text': final
+                }
+            request = Request(
+                webhook_url, 
+                data=json.dumps(slack_data).encode(),
+                headers={'Content-Type': 'application/json'}
+                )
+        if type(event['Records'][0]['Sns']['Message']) == type(x):
+            try:
+                sns_message = json.loads(event['Records'][0]['Sns']['Message'])
+                print(sns_message)
+                def clean_nones(sns_message):
+                    if isinstance(sns_message, list):
+                        return [clean_nones(x) for x in sns_message if x is not None]
+                    elif isinstance(sns_message, dict):
+                        return {
+                            key: clean_nones(val)
+                            for key, val in sns_message.items()
+                            if val is not None
+                        }
+                    else:
+                        return sns_message
+    
+                name=json.dumps((clean_nones(sns_message)),separators=(". ", " = "))
+                final=name.replace('"','').replace('{','').replace('}','')
+                slack_data ={
+                'channel': 'general',
+                'text': final
+                    }
+                request = Request(
+                    webhook_url, 
+                    data=json.dumps(slack_data).encode(),
+                    headers={'Content-Type': 'application/json'}
+                    )
+            except:
+                message = event['Records'][0]['Sns']['Message']
+                slack_data ={
+                'channel': 'general',
+                'text': message
+                    }
+                request = Request(
+                    webhook_url, 
+                    data=json.dumps(slack_data).encode(),
+                    headers={'Content-Type': 'application/json'}
+                    )               
+        response = urlopen(request)
+        return {
+            'statusCode': response.getcode(),
+            'body': response.read().decode()
+        }
+
+    except:
+        sns_message ={
+        'channel': 'general',
+        'text': 'data is empty'
+            }
+        
+        request = Request(
+            webhook_url, 
+            data=json.dumps(sns_message).encode(),
+            headers={'Content-Type': 'application/json'}
+            )
+        response = urlopen(request)
+        return {
+            'statusCode': response.getcode(),
+            'body': response.read().decode()
+        }
+
