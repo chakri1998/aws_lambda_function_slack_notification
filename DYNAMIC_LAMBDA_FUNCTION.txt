@@ -8,7 +8,7 @@ import boto3
 session = boto3.session.Session()
 
 def lambda_handler(event, context):
-    webhook_url = 'https://hooks.slack.com/services/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' # Set destination URL here
+    webhook_url = 'WEB_HOOK_URL' # Set destination URL here
     
     try:
         x="i am string"
@@ -33,7 +33,7 @@ def lambda_handler(event, context):
             name=json.dumps((clean_nones(message)),separators=(". ", " = "))
             final=name.replace('"','').replace('{','').replace('}','')
             slack_data ={
-            'channel': 'general',
+            'channel': 'CHANNEL_NAME',
             'text': final
                 }
             request = Request(
@@ -60,7 +60,7 @@ def lambda_handler(event, context):
                 name=json.dumps((clean_nones(sns_message)),separators=(". ", " = "))
                 final=name.replace('"','').replace('{','').replace('}','')
                 slack_data ={
-                'channel': 'general',
+                'channel': 'CHANNEL_NAME',
                 'text': final
                     }
                 request = Request(
@@ -71,7 +71,7 @@ def lambda_handler(event, context):
             except:
                 message = event['Records'][0]['Sns']['Message']
                 slack_data ={
-                'channel': 'general',
+                'channel': 'CHANNEL_NAME',
                 'text': message
                     }
                 request = Request(
@@ -87,7 +87,7 @@ def lambda_handler(event, context):
 
     except:
         sns_message ={
-        'channel': 'general',
+        'channel': 'CHANNEL_NAME',
         'text': 'data is empty'
             }
         
